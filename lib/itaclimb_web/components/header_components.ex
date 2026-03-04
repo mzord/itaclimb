@@ -2,7 +2,7 @@ defmodule ItaclimbWeb.HeaderComponents do
   use ItaclimbWeb, :html
   use Phoenix.Component
 
-
+  attr :scope, :any
   def main_header(assigns) do
     ~H"""
     <header class="bg-[#111111] border-b border-gray-800 sticky top-0 z-50">
@@ -24,9 +24,18 @@ defmodule ItaclimbWeb.HeaderComponents do
             <li><a href="#" class="hover:text-[#CC9933] transition-colors">Comunidade</a></li>
             <li><a href="#" class="hover:text-[#CC9933] transition-colors">Sobre</a></li>
           </ul>
-          <button class="bg-[#CC9933] text-[#111111] px-4 py-1.5 rounded text-xs font-black uppercase hover:bg-yellow-600 transition-all">
-            Entrar
-          </button>
+          <%= if @scope do %>
+            <.button href={~p"/users/settings"} class="bg-[#CC9933] text-[#111111] px-4 py-1.5 rounded text-xs font-black uppercase hover:bg-yellow-600 transition-all">
+              <%= @scope.user.email %>
+            </.button>
+            <.button>
+              <.link href={~p"/users/log-out"} method="delete">Log out</.link>
+            </.button>
+          <% else %>
+            <.button href={~p"/users/log-in"} class="bg-[#CC9933] text-[#111111] px-4 py-1.5 rounded text-xs font-black uppercase hover:bg-yellow-600 transition-all">
+              Entrar
+            </.button>
+          <% end %>
         </div>
 
         <div class="md:hidden">
