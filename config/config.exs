@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :itaclimb, :scopes,
+  user: [
+    default: true,
+    module: Itaclimb.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :id,
+    schema_table: :users,
+    test_data_fixture: Itaclimb.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :itaclimb,
   ecto_repos: [Itaclimb.Repo],
   generators: [timestamp_type: :utc_datetime]
@@ -46,10 +59,11 @@ config :tailwind,
   version: "4.1.12",
   itaclimb: [
     args: ~w(
+      --config=assets/tailwind.config.js
       --input=assets/css/app.css
       --output=priv/static/assets/css/app.css
     ),
-    cd: Path.expand("..", __DIR__)
+    cd: Path.expand("../", __DIR__)
   ]
 
 # Configure Elixir's Logger

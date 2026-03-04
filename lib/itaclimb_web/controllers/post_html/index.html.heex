@@ -1,29 +1,35 @@
-<Layouts.app flash={@flash}>
-  <.header>
-    Listing Posts
-    <:actions>
-      <.button href={~p"/posts/new"}>
-        <.icon name="hero-plus" /> New Post
-      </.button>
-    </:actions>
-  </.header>
+<Layouts.itaclimb flash={@flash} >
+  
+  <div class="relative h-[40vh] flex items-center justify-center overflow-hidden border-b border-[#CC9933]/20">
+    <div class="absolute inset-0 bg-black/60 z-10"></div>
+    <img src="https://images.unsplash.com/photo-1522163182402-834f871fd851?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover blur-sm opacity-50" alt="Background">
+    <div class="relative z-20 text-center">
+      <h1 class="text-white text-5xl md:text-7xl font-black font-mono tracking-tighter uppercase italic">Notícias da<span class="text-[#CC9933]"> Comunidade</span></h1>
+      <p class="text-gray-400 mt-4 tracking-[0.5em] text-sm font-bold uppercase">Notícias e Artigos da Escalada Carioca</p>
+    </div>
+  </div>
 
-  <.table id="posts" rows={@posts} row_click={&JS.navigate(~p"/posts/#{&1}")}>
-    <:col :let={post} label="Title">{post.title}</:col>
-    <:col :let={post} label="Body">{post.body}</:col>
-    <:col :let={post} label="Slug">{post.slug}</:col>
-    <:col :let={post} label="Published at">{post.published_at}</:col>
-    <:col :let={post} label="Views">{post.views}</:col>
-    <:action :let={post}>
-      <div class="sr-only">
-        <.link navigate={~p"/posts/#{post}"}>Show</.link>
+  <%= for post <- @posts do %>
+  
+  <div class="container mx-auto max-w-5xl px-4 -mt-10 relative z-30">
+    <article class="bg-[#1a1a1a] rounded-2xl overflow-hidden border border-gray-800 shadow-2xl mb-12 group">
+      <div class="flex flex-col lg:flex-row">
+        <div class="lg:w-3/5 overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1522163182402-834f871fd851?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Main News">
+        </div>
+        <div class="p-8 lg:w-2/5 flex flex-col justify-center">
+          <h2 class="text-white text-3xl font-bold mb-4 leading-tight group-hover:text-[#CC9933] transition-colors"><%= post.title %></h2>
+          <p class="text-gray-400 text-sm leading-relaxed mb-6">
+            <%= post.body %>
+          </p>
+          <span class="text-gray-500 text-[10px] font-bold uppercase">Tempo de Leitura: <%= post.reading_time %> minuto</span>
+          <div class="mt-auto flex items-center justify-between border-t border-gray-800 pt-6">
+            <span class="text-gray-500 text-[10px] font-bold">POR: Pedro Alves. • 02 MAR 2026</span>
+            <a href={~p"/posts/#{post}"} class="text-white font-black text-xs border-b-2 border-[#CC9933] pb-1">LER ARTIGO COMPLETO</a>
+          </div>
+        </div>
       </div>
-      <.link navigate={~p"/posts/#{post}/edit"}>Edit</.link>
-    </:action>
-    <:action :let={post}>
-      <.link href={~p"/posts/#{post}"} method="delete" data-confirm="Are you sure?">
-        Delete
-      </.link>
-    </:action>
-  </.table>
-</Layouts.app>
+    </article>
+  </div>
+  <% end %>
+</Layouts.itaclimb>

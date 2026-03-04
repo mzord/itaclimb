@@ -1,5 +1,8 @@
 defmodule ItaclimbWeb.Router do
+  alias ItaclimbWeb
   use ItaclimbWeb, :router
+
+  import ItaclimbWeb.UserAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -8,6 +11,7 @@ defmodule ItaclimbWeb.Router do
     plug :put_root_layout, html: {ItaclimbWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
   end
 
   pipeline :api do
@@ -17,8 +21,8 @@ defmodule ItaclimbWeb.Router do
   scope "/", ItaclimbWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
-    
+    live "/", HomeLive, :index
+
     resources "/posts", PostController
   end
 
@@ -42,5 +46,33 @@ defmodule ItaclimbWeb.Router do
       live_dashboard "/dashboard", metrics: ItaclimbWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  ## Authentication routes
+
+  scope "/", ItaclimbWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{ItaclimbWeb.UserAuth, :require_authenticated}] do
+      live "/users/settings", UserLive.Settings, :edit
+      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+    end
+
+    post "/users/update-password", UserSessionController, :update_password
+  end
+
+  scope "/", ItaclimbWeb do
+    pipe_through [:browser]
+
+    live_session :current_user,
+      on_mount: [{ItaclimbWeb.UserAuth, :mount_current_scope}] do
+      live "/users/register", UserLive.Registration, :new
+      live "/users/log-in", UserLive.Login, :new
+      live "/users/log-in/:token", UserLive.Confirmation, :new
+    end
+
+    post "/users/log-in", UserSessionController, :create
+    delete "/users/log-out", UserSessionController, :delete
   end
 end

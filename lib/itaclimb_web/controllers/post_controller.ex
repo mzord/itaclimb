@@ -28,6 +28,9 @@ defmodule ItaclimbWeb.PostController do
 
   def show(conn, %{"id" => id}) do
     post = Blog.get_post!(id)
+
+    Blog.increment_post_views(post)
+
     render(conn, :show, post: post)
   end
 

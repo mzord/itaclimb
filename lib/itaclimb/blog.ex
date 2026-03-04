@@ -18,7 +18,27 @@ defmodule Itaclimb.Blog do
 
   """
   def list_posts do
-    Repo.all(Post)
+    Post
+    |> Repo.all()
+    |> Enum.map(&calculate_reading_time/1)
+  end
+
+
+   @doc """
+  Returns the list of the first three posts.
+
+  ## Examples
+
+      iex> list_posts()
+      [%Post{}, ...]
+
+  """
+  def list_first_three_posts(limit \\ 3) do
+    Post
+    |> order_by(desc: :inserted_at)
+    |> limit(^limit)
+    |> Repo.all()
+    |> Enum.map(&calculate_reading_time/1)
   end
 
   @doc """
@@ -35,7 +55,11 @@ defmodule Itaclimb.Blog do
       ** (Ecto.NoResultsError)
 
   """
-  def get_post!(id), do: Repo.get!(Post, id)
+  def get_post!(id) do
+    Post
+    |> Repo.get!(id)
+    |> calculate_reading_time()
+  end
 
   @doc """
   Creates a post.
@@ -101,4 +125,24 @@ defmodule Itaclimb.Blog do
   def change_post(%Post{} = post, attrs \\ %{}) do
     Post.changeset(post, attrs)
   end
+
+  @doc """
+    Increments Post view.
+  """
+  def increment_post_views(%Post{} = post) do
+    from(p in Post, where: p.id == ^post.id)
+    |> Repo.update_all(inc: [views: 1])
+
+    %{post | views: post.views + 1}
+  end
+
+  defp calculate_reading_time(post) do
+    words_per_minute = 200
+    word_count = post.body |> String.split() |> Enum.count()
+    minutes = max(1, round(word_count / words_per_minute))
+
+    # Aqui a "mágica": colocamos o valor no campo virtual da struct
+    %{post | reading_time: minutes}
+  end
+
 end
