@@ -133,7 +133,7 @@ defmodule Itaclimb.Blog do
     from(p in Post, where: p.id == ^post.id)
     |> Repo.update_all(inc: [views: 1])
 
-    %{post | views: post.views + 1}
+    %{post | views: (post.views || 0) + 1}
   end
 
   defp calculate_reading_time(post) do

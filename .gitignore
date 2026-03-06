@@ -35,3 +35,5 @@ itaclimb-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Sensitivity stuff
+.env

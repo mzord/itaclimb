@@ -24,6 +24,11 @@ config :itaclimb,
   ecto_repos: [Itaclimb.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+config :itaclimb, :imagekit,
+  url_endpoint: "https://ik.imagekit.io/itaclimb/",
+  public_key: System.get_env("IMGKITPUBKEY"),
+  private_key: System.get_env("IMGKITPRIVKEY")
+
 # Configure the endpoint
 config :itaclimb, ItaclimbWeb.Endpoint,
   url: [host: "localhost"],

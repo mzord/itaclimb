@@ -23,6 +23,8 @@ services:
       - "4000:4000"
     environment:
       - DATABASE_URL=ecto://itaclimb_dev:itaclimb_dev@db/itaclimb_dev
+      - IMGKITPUBKEY=${IMGKITPUBKEY}
+      - IMGKITPRIVKEY=${IMGKITPRIVKEY}
     depends_on:
       - db
     

@@ -9,7 +9,31 @@ defmodule Itaclimb.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
+    field :username, :string
+    field :location, :string
+    field :profile_picture_url, :string
+    field :imagekit_file_id, :string
+
     timestamps(type: :utc_datetime)
+  end
+
+  def registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :password, :username, :location, :profile_picture_url, :imagekit_file_id])
+    |> validate_email(opts)
+    |> validate_password(opts)
+    |> validate_username()
+  end
+
+  def profile_picture_changeset(user, attrs) do
+    cast(user, attrs, [:profile_picture_url, :imagekit_file_id])
+  end
+
+  defp validate_username(changeset) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, min: 3, max: 20)
+    |> unique_constraint(:username)
   end
 
   @doc """

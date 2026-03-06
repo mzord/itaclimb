@@ -23,12 +23,12 @@ defmodule Itaclimb.AccountsTest do
     end
 
     test "does not return the user if the password is not valid" do
-      user = user_fixture() |> set_password()
+      user = user_fixture()
       refute Accounts.get_user_by_email_and_password(user.email, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
-      %{id: id} = user = user_fixture() |> set_password()
+      %{id: id} = user = user_fixture()
 
       assert %User{id: ^id} =
                Accounts.get_user_by_email_and_password(user.email, valid_user_password())
@@ -77,11 +77,11 @@ defmodule Itaclimb.AccountsTest do
       assert "has already been taken" in errors_on(changeset).email
     end
 
-    test "registers users without password" do
+    test "registers users with password" do
       email = unique_user_email()
       {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
       assert user.email == email
-      assert is_nil(user.hashed_password)
+      assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
     end
@@ -330,17 +330,6 @@ defmodule Itaclimb.AccountsTest do
   end
 
   describe "login_user_by_magic_link/1" do
-    test "confirms user and expires tokens" do
-      user = unconfirmed_user_fixture()
-      refute user.confirmed_at
-      {encoded_token, hashed_token} = generate_user_magic_link_token(user)
-
-      assert {:ok, {user, [%{token: ^hashed_token}]}} =
-               Accounts.login_user_by_magic_link(encoded_token)
-
-      assert user.confirmed_at
-    end
-
     test "returns user and (deleted) token for confirmed user" do
       user = user_fixture()
       assert user.confirmed_at
@@ -352,7 +341,7 @@ defmodule Itaclimb.AccountsTest do
 
     test "raises when unconfirmed user has password set" do
       user = unconfirmed_user_fixture()
-      {1, nil} = Repo.update_all(User, set: [hashed_password: "hashed"])
+      refute user.confirmed_at
       {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
 
       assert_raise RuntimeError, ~r/magic link log in is not allowed/, fn ->

@@ -9,7 +9,7 @@ config :itaclimb, Itaclimb.Repo,
   port: 5432,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 5
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

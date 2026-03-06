@@ -7,6 +7,7 @@ defmodule Itaclimb.Blog.Post do
     field :body, :string
     field :slug, :string
     field :views, :integer
+    field :published_at, :utc_datetime
 
     # Virtual
     field :reading_time, :integer, virtual: true
@@ -17,7 +18,7 @@ defmodule Itaclimb.Blog.Post do
   @doc false
   def changeset(post, attrs) do
     post
-    |> cast(attrs, [:title, :body, :slug])
+    |> cast(attrs, [:title, :body, :slug, :views, :published_at])
     |> validate_required([:title, :body, :slug])
     |> unique_constraint(:slug)
     |> compute_reading_time()

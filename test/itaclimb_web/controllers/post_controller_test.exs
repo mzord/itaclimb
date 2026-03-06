@@ -10,7 +10,7 @@ defmodule ItaclimbWeb.PostControllerTest do
   describe "index" do
     test "lists all posts", %{conn: conn} do
       conn = get(conn, ~p"/posts")
-      assert html_response(conn, 200) =~ "Listing Posts"
+      assert html_response(conn, 200) =~ "Notícias da"
     end
   end
 

@@ -30,6 +30,24 @@ defmodule ItaclimbWeb.UserLive.Settings do
 
       <div class="divider" />
 
+      <.header>
+        Profile Picture
+        <:subtitle>Update your avatar. The old one will be deleted automatically.</:subtitle>
+      </.header>
+
+      <div class="mt-4">
+        <%= if @current_scope.user.profile_picture_url do %>
+          <img src={@current_scope.user.profile_picture_url} class="w-24 h-24 rounded-full object-cover mb-4" alt="Current avatar" />
+        <% end %>
+
+        <.form for={%{}} id="avatar_form" phx-change="validate_avatar" phx-submit="update_avatar" multipart>
+          <.live_file_input upload={@uploads.avatar} />
+          <.button variant="primary" phx-disable-with="Uploading..." >Update Avatar</.button>
+        </.form>
+      </div>
+
+      <div class="divider" />
+
       <.form
         for={@password_form}
         id="password_form"
@@ -94,6 +112,7 @@ defmodule ItaclimbWeb.UserLive.Settings do
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:trigger_submit, false)
+      |> allow_upload(:avatar, accept: ~w(.jpg .jpeg .png), max_entries: 1)
 
     {:ok, socket}
   end
@@ -142,6 +161,42 @@ defmodule ItaclimbWeb.UserLive.Settings do
       |> to_form()
 
     {:noreply, assign(socket, password_form: password_form)}
+  end
+
+  def handle_event("validate_avatar", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("update_avatar", _params, socket) do
+    user = socket.assigns.current_scope.user
+    results = consume_uploaded_entries(socket, :avatar, fn %{path: path}, entry ->
+      file_binary = File.read!(path)
+      {:ok, Itaclimb.ImageKit.upload(file_binary, entry.client_name)}
+    end)
+
+
+
+    case results do
+      [{:ok, %{url: url, file_id: file_id}}] ->
+        Itaclimb.ImageKit.delete(user.imagekit_file_id)
+
+        case Accounts.update_user_profile_picture(user, %{profile_picture_url: url, imagekit_file_id: file_id}) do
+          {:ok, _user} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Profile picture updated successfully.")
+             |> push_navigate(to: ~p"/users/settings")}
+
+          {:error, _} ->
+            {:noreply, put_flash(socket, :error, "Failed to save profile picture.")}
+        end
+
+      [{:error, msg}] ->
+        {:noreply, put_flash(socket, :error, "Upload failed: #{msg}")}
+
+      [] ->
+        {:noreply, put_flash(socket, :error, "Please select an image first.")}
+    end
   end
 
   def handle_event("update_password", params, socket) do
